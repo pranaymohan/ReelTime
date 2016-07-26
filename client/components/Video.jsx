@@ -11,14 +11,36 @@ class Video extends React.Component {
   componentDidMount() {
     // Begin animating the video when it starts playing
     const video = document.querySelector('video');
+    console.log('inside componentDidMount');
+    this.initializeVoice(video);
+
     video.addEventListener('canplay', (e) => {
       video.className += ' video-reveal';
       setTimeout(() => { video.className = 'video'; }, 2000);
     });
   }
 
-  emitPlayAndListenForPause(e) {
-    const video = e.target;
+  initializeVoice(video) {
+    // Initialize annyong voice command library and define commands
+    if (annyang) {
+      console.log('inside if annyang in initializeVoice');
+      var commands = {
+        'play': function() {
+          console.log('play command received');
+          video.play();
+          this.emitPlayAndListenForPause(video);
+        }
+        // TODO: add pause command
+      };
+
+      annyang.addCommands(commands);
+
+      annyang.start();
+    }
+  }
+
+  emitPlayAndListenForPause(eventOrVideo) {
+    const video = eventOrVideo.target ? eventOrVideo.target : eventOrVideo;
     this.props.socket.emit('play', video.currentTime);
     this.props.socket.on('pause', (otherTime) => {
       if (Math.floor(video.currentTime) > Math.floor(otherTime) + 0.5 ||
