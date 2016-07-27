@@ -27,8 +27,8 @@ const Landing = (props) => (
               </p>
             </TabPanel>
             <TabPanel>
-              <form className="link-form">
-                <input type="text" autoFocus={true} placeholder="Paste video link here"/>
+              <form className="link-form" id="youtubeform" name="youtubeform" onSubmit={props.setYoutubeLink}>
+                <input type="text" name="link" id="youtubelink"  autoFocus={true} placeholder="Paste video link here"/>
                 <input type="submit" value="submit" className="btn btn-primary link-form-submit" />
               </form>
             </TabPanel>

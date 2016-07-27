@@ -13,7 +13,7 @@ class Link extends React.Component {
   }
 
   render() {
-    let url = host + '?id=' + this.props.myId;
+    let url = host + '?id=' + this.props.myId + '&video=' + this.props.type;
 
     return (
       <div id="link">
