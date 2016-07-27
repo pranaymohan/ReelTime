@@ -1,6 +1,6 @@
 import React from 'react';
 
-let host = process.env.NODE_ENV === 'production' ? 'https://realtimeapp.herokuapp.com/' : 'http://localhost:3000/'; 
+let host = process.env.NODE_ENV === 'production' ? 'https://reeltimeapp.herokuapp.com/' : 'http://localhost:3000/'; 
 const Link = (props) => (
   <div id="link">
     <div id="link-message">
