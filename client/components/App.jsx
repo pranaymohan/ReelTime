@@ -13,6 +13,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.setFile = this.setFile.bind(this);
+    this.setLink = this.setLink.bind(this);
 
     const params = new URLSearchParams(location.search.slice(1));
     const isSource = !params.has('id');
@@ -25,6 +26,8 @@ class App extends React.Component {
       showLanding: isSource,
       showLink: isSource,
       showBody: !isSource,
+      // youtube state variables
+      youtubeLink: null
     };
   }
 
@@ -39,6 +42,18 @@ class App extends React.Component {
   setFile(e) {
     this.setState({
       file: e.target.files[0],
+      showLanding: false,
+      showBody: true,
+    });
+  }
+
+  setLink(e) {
+    e.preventDefault();
+    var linkText = e.target.childNodes[0].value;
+    console.log('you typed:', linkText);
+
+    this.setState({
+      youtubeLink: linkText,
       showLanding: false,
       showBody: true,
     });
@@ -91,7 +106,7 @@ class App extends React.Component {
   render() {
     return (
       <div>
-        {this.state.showLanding ? <Landing setFile={this.setFile} /> : null}
+        {this.state.showLanding ? <Landing setFile={this.setFile} setLink={this.setLink} /> : null}
         {this.state.showLink ? <Link myId={this.state.myId} /> : null}
         {this.state.showBody ? <div className="wrapper">
           <Video socket={this.props.socket} />
