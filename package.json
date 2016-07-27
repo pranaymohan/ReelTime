@@ -4,7 +4,8 @@
   "description": "Watch videos with your friends, in your underwear.",
   "main": "server/index.js",
   "scripts": {
-    "start": "node server/index.js",
+    "webpack": "webpack --watch",
+    "start": "npm run webpack & nodemon server/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -36,6 +37,7 @@
     "eslint-plugin-import": "^1.11.1",
     "eslint-plugin-jsx-a11y": "^1.5.5",
     "eslint-plugin-react": "^5.2.2",
+    "nodemon": "^1.10.0",
     "webpack": "^1.13.1"
   }
 }
