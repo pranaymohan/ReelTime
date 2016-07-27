@@ -11,7 +11,6 @@ class Video extends React.Component {
   componentDidMount() {
     // Begin animating the video when it starts playing
     const video = document.querySelector('video');
-    console.log('inside componentDidMount');
     this.initializeVoice(video);
 
     video.addEventListener('canplay', (e) => {
@@ -23,19 +22,35 @@ class Video extends React.Component {
   initializeVoice(video) {
     // Initialize annyong voice command library and define commands
     if (annyang) {
-      console.log('inside if annyang in initializeVoice');
       var commands = {
-        'play': function() {
+        'play': () => {
           console.log('play command received');
           video.play();
           this.emitPlayAndListenForPause(video);
+        },
+        'pause': () => {
+          console.log('pause command received');
+          video.pause();
+          this.emitPlayAndListenForPause(video);
+        },
+        'go back': () => {
+          console.log('go back command received');
+          // video.pause(); TODO: change this to a command to go back 5 seconds
         }
-        // TODO: add pause command
       };
 
+      annyang.debug();
       annyang.addCommands(commands);
-
       annyang.start();
+
+      setInterval(function() {
+        var listen = annyang.isListening();
+        console.log('listen:', listen);
+      }, 1000);
+
+      annyang.addCallback('error', function(err) {
+        console.log('annyang error:', err);
+      });
     }
   }
 
