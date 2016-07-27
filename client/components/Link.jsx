@@ -12,7 +12,7 @@ const Link = (props) => {
         Send your friend the following link:<br />
         <span id="link-url">{url}</span>
         <CopyToClipboard text={`${url}`}>
-          <button>Copy to clipboard</button>
+          <button className="btn btn-primary copy-btn">Copy to clipboard</button>
         </CopyToClipboard>
       </div>
     </div>
