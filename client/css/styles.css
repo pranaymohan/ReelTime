@@ -162,3 +162,12 @@ form {
 .copy-btn {
   margin-top: 20px;
 }
+
+.copied-text {
+  margin-left: 10px;
+  color: #fec503;
+  font-size: 20px;
+}
+
+
+

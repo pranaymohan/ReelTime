@@ -3,21 +3,39 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 
 let host = process.env.NODE_ENV === 'production' ? 'https://reeltimeapp.herokuapp.com/' : 'http://localhost:3000/'; 
 
-const Link = (props) => {
-  let url = host + '?id=' + props.myId;
+class Link extends React.Component {
+  constructor(props) {
+    super(props);
+    
+    this.state = {
+      copied: false
+    }
+  }
 
-  return (
-    <div id="link">
-      <div id="link-message">
-        Send your friend the following link:<br />
-        <span id="link-url">{url}</span>
-        <CopyToClipboard text={`${url}`}>
-          <button className="btn btn-primary copy-btn">Copy to clipboard</button>
-        </CopyToClipboard>
+  render() {
+    let url = host + '?id=' + this.props.myId;
+
+    return (
+      <div id="link">
+        <div id="link-message">
+          Send your friend the following link:<br />
+          <span id="link-url">{url}</span>
+
+          <div className="copy-btn">
+            <CopyToClipboard text={`${url}`}
+              onCopy={ () => this.setState({ copied: true }) }>
+              <button className="btn btn-primary">Copy to clipboard</button>
+            </CopyToClipboard>
+
+            {this.state.copied ? <span className="copied-text">Copied!</span> : null}
+          </div>
+
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  }
+  
+}
 
 Link.propTypes = {
   myId: React.PropTypes.string,
