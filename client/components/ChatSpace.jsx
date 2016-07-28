@@ -13,6 +13,9 @@ class ChatSpace extends React.Component {
       message: '',
       messages: [
         { className: 'other', text: 'Begin chatting here.' },
+        { className: 'other', text: 'Did you know that you can ' + 
+          'control the video player with just your voice? Try it ' + 
+          'out with commands like "play", "pause", and "go back"' }
       ],
     };
 
