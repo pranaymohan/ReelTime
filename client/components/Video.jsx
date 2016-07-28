@@ -17,6 +17,11 @@ class Video extends React.Component {
       video.className += ' video-reveal';
       setTimeout(() => { video.className = 'video'; }, 2000);
     });
+
+    this.props.socket.on('go back', (otherTime) => {
+      console.log('go back message received, about to sync');
+      this.syncVideos(video, otherTime);
+    });
   }
 
   initializeVoice(video) {
@@ -24,25 +29,26 @@ class Video extends React.Component {
     if (annyang) {
       var commands = {
         'play': () => {
-          console.log('play command received');
+          console.log('play voice command received');
           video.play();
           this.emitPlayAndListenForPause(video);
         },
         'pause': () => {
-          console.log('pause command received');
+          console.log('pause voice command received');
           video.pause();
-          this.emitPlayAndListenForPause(video);
+          this.emitPauseAndListenForPlay(video);
         },
         'go back': () => {
-          console.log('go back command received');
+          console.log('go back voice command received');
           video.currentTime = Math.floor(video.currentTime - 10, 0);
+          this.emitGoBack(video);
         },
         'mute': () => {
-          console.log('mute command received');
+          console.log('mute voice command received');
           video.muted = true;
         },
         'unmute': () => {
-          console.log('mute command received');
+          console.log('unmute voice command received');
           video.muted = false;
         }
       };
@@ -62,28 +68,33 @@ class Video extends React.Component {
     }
   }
 
+  syncVideos(video, otherTime) {
+    if (Math.floor(video.currentTime) > Math.floor(otherTime) + 0.5 ||
+        Math.floor(video.currentTime) < Math.floor(otherTime) - 0.5) {
+      video.currentTime = otherTime;
+    }
+  }
+
   emitPlayAndListenForPause(eventOrVideo) {
     const video = eventOrVideo.target ? eventOrVideo.target : eventOrVideo;
     this.props.socket.emit('play', video.currentTime);
     this.props.socket.on('pause', (otherTime) => {
-      if (Math.floor(video.currentTime) > Math.floor(otherTime) + 0.5 ||
-          Math.floor(video.currentTime) < Math.floor(otherTime) - 0.5) {
-        video.currentTime = otherTime;
-      }
+      this.syncVideos(video, otherTime);
       video.pause();
     });
   }
 
-  emitPauseAndListenForPlay(e) {
-    const video = e.target;
+  emitPauseAndListenForPlay(eventOrVideo) {
+    const video = eventOrVideo.target ? eventOrVideo.target : eventOrVideo;
     this.props.socket.emit('pause', video.currentTime);
     this.props.socket.on('play', (otherTime) => {
-      if (Math.floor(video.currentTime) > Math.floor(otherTime) + 0.5 ||
-          Math.floor(video.currentTime) < Math.floor(otherTime) - 0.5) {
-        video.currentTime = otherTime;
-      }
+      this.syncVideos(video, otherTime);
       video.play();
     });
+  }
+
+  emitGoBack(video) {
+    this.props.socket.emit('go back', video.currentTime);
   }
 
   render() {

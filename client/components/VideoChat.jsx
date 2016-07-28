@@ -15,7 +15,7 @@ class VideoChat extends React.Component {
 
   componentDidMount() {
     const constraints = {
-      audio: true, // ZS set this to false so that annyang can access the mic
+      audio: true,
       video: true,
     };
 
