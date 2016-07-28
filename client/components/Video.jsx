@@ -11,11 +11,24 @@ class Video extends React.Component {
   componentDidMount() {
     // Begin animating the video when it starts playing
     const video = document.querySelector('video');
-    this.initializeVoice(video);
+    this.initVoice(video);
+    this.initListeners(video);
 
     video.addEventListener('canplay', (e) => {
       video.className += ' video-reveal';
       setTimeout(() => { video.className = 'video'; }, 2000);
+    });
+  }
+
+  initListeners(video) {
+    this.props.socket.on('play', (otherTime) => {
+      this.syncVideos(video, otherTime);
+      video.play();
+    });
+
+    this.props.socket.on('pause', (otherTime) => {
+      this.syncVideos(video, otherTime);
+      video.pause();
     });
 
     this.props.socket.on('go back', (otherTime) => {
@@ -24,7 +37,7 @@ class Video extends React.Component {
     });
   }
 
-  initializeVoice(video) {
+  initVoice(video) {
     // Initialize annyong voice command library and define commands
     if (annyang) {
       var commands = {
@@ -78,22 +91,15 @@ class Video extends React.Component {
   emitPlayAndListenForPause(eventOrVideo) {
     const video = eventOrVideo.target ? eventOrVideo.target : eventOrVideo;
     this.props.socket.emit('play', video.currentTime);
-    this.props.socket.on('pause', (otherTime) => {
-      this.syncVideos(video, otherTime);
-      video.pause();
-    });
   }
 
   emitPauseAndListenForPlay(eventOrVideo) {
     const video = eventOrVideo.target ? eventOrVideo.target : eventOrVideo;
     this.props.socket.emit('pause', video.currentTime);
-    this.props.socket.on('play', (otherTime) => {
-      this.syncVideos(video, otherTime);
-      video.play();
-    });
   }
 
   emitGoBack(video) {
+    // this method will only ever be passed a video, never an event
     this.props.socket.emit('go back', video.currentTime);
   }
 
