@@ -35,7 +35,15 @@ class Video extends React.Component {
         },
         'go back': () => {
           console.log('go back command received');
-          // video.pause(); TODO: change this to a command to go back 5 seconds
+          video.currentTime = Math.floor(video.currentTime - 10, 0);
+        },
+        'mute': () => {
+          console.log('mute command received');
+          video.muted = true;
+        },
+        'unmute': () => {
+          console.log('mute command received');
+          video.muted = false;
         }
       };
 
