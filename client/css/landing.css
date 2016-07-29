@@ -756,7 +756,7 @@ body {
   color: white;
   text-align: center;
   vertical-align: middle;
-  line-height: 80vh;
+  margin-top: 45%;
   font-size: 5vh;
 }
 
@@ -766,24 +766,39 @@ body {
   -moz-border-radius: 50px;
   -webkit-border-radius: 50px;
   border-radius: 59%;
-  background-color: 224,122,122,0.4
-  color: #ccc;
+  background-color: rgba(224,122,122,0.4);
   margin: auto;
 }
 
-.landing-circle {
-  width: 80vh;
-  height: 80vh;
-  -moz-border-radius: 50px;
-  -webkit-border-radius: 50px;
-  border-radius: 59%;
-  background-color: rgba(224,122,122,0.4);
-  color: #ccc;
+.landing-tabs {
+  position: relative;
+  top: 40%;
+  width: 75%
+}
+
+.react-tabs [role=tablist] {
+  margin: 0 auto;
+  z-index: 1;
 }
 
 .drop-box {
   opacity: 0;
   position: absolute;
   margin-top: -80vh;
+  cursor: pointer;
 }
+
+.link-form {
+  margin-top: 45%;
+  font-size: 5vh;
+  color: black;
+}
+
+.link-form-submit {
+  display: block;
+  margin: 15px auto;
+  font-size: 3vh;
+  background-color: rgba(55,27,44,0.6);
+}
+
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 
 const Landing = (props) => (
   <div id="page-top" className="index landing">
@@ -14,10 +15,24 @@ const Landing = (props) => (
         <div className="intro-text">
           <div className="intro-lead-in">Watch TV with your friends</div>
           <div className="intro-heading">But in your underwear</div>
-          <p className="landing-drop-text landing-circle">
-            Drop Your Video File Here
-            <input type="file" id="files" className="landing-circle drop-box" name="file" onChange={props.setFile} />
-          </p>
+          <Tabs className="landing-circle">
+            <TabList className="landing-tabs">
+              <Tab>Upload</Tab>
+              <Tab>Stream</Tab>
+            </TabList>
+            <TabPanel>
+              <p className="landing-drop-text">
+                Drop Your Video File Here
+                <input type="file" id="files" className="landing-circle drop-box" name="file" onChange={props.setFile} />
+              </p>
+            </TabPanel>
+            <TabPanel>
+              <form className="link-form">
+                <input type="text" autoFocus={true} placeholder="Paste video link here"/>
+                <input type="submit" value="submit" className="btn btn-primary link-form-submit" />
+              </form>
+            </TabPanel>
+          </Tabs>
         </div>
       </div>
     </header>
