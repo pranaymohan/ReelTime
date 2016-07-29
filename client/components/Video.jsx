@@ -37,37 +37,70 @@ class Video extends React.Component {
     });
   }
 
+  // Initialize annyong voice command library and define commands
   initVoice(video) {
-    // Initialize annyong voice command library and define commands
-    if (annyang) {
-      var commands = {
-        'play': () => {
-          console.log('play voice command received');
-          video.play();
-          this.emitPlayAndListenForPause(video);
-        },
-        'pause': () => {
-          console.log('pause voice command received');
-          video.pause();
-          this.emitPauseAndListenForPlay(video);
-        },
-        'go back': () => {
-          console.log('go back voice command received');
-          video.currentTime = Math.floor(video.currentTime - 10, 0);
-          this.emitGoBack(video);
-        },
-        'mute': () => {
-          console.log('mute voice command received');
-          video.muted = true;
-        },
-        'unmute': () => {
-          console.log('unmute voice command received');
-          video.muted = false;
-        }
-      };
+    var playFunction = () => {
+      console.log('play voice command received');
+      video.play();
+      this.emitPlayAndListenForPause(video);
+    };
 
+    var pauseFunction = () => {
+      console.log('pause voice command received');
+      video.pause();
+      this.emitPauseAndListenForPlay(video);
+    };
+
+    var goBackFunction = () => {
+      console.log('go back voice command received');
+      video.currentTime = Math.floor(video.currentTime - 10, 0);
+      this.emitGoBack(video);
+    };
+
+    var muteFunction = () => {
+      console.log('mute voice command received');
+      video.muted = true;
+    };
+
+    var unmuteFunction = () => {
+      console.log('unmute voice command received');
+      video.muted = false;
+    };
+
+    var playCommands = {'play': playFunction};
+    var goBackCommands = {'go back': goBackFunction};
+
+    // define words that empirically sound like our main command, and synonyms
+    var pauseWords = ['pause', 'call', 'car', 'cars', 'cause', 'hans', 
+      'hollis', 'hot', 'palm', 'paul', 'paula\'s', 'paw', 'pawn', 
+      'paws', 'pod', 'pods', 'polish', 'pond', 'posh'];
+    var muteWords = ['mute', 'new', 'news', 'newt', 'nude', 'use', 'used', 'you'];
+    var unmuteWords = ['unmute', 'enhance', 'enhanced', 'in hands', 'in hats', 'n hance'];
+
+    // generate a command object for each array of command words
+    var pauseCommands = pauseWords.reduce(function(obj, word) {
+      obj[word] = pauseFunction;
+      return obj;
+    }, {});
+
+    var muteCommands = muteWords.reduce(function(obj, word) {
+      obj[word] = muteFunction;
+      return obj;
+    }, {});
+
+    var unmuteCommands = unmuteWords.reduce(function(obj, word) {
+      obj[word] = unmuteFunction;
+      return obj;
+    }, {});
+
+
+    if (annyang) {
       annyang.debug();
-      annyang.addCommands(commands);
+      annyang.addCommands(playCommands);
+      annyang.addCommands(pauseCommands);
+      annyang.addCommands(goBackCommands);
+      annyang.addCommands(muteCommands);
+      annyang.addCommands(unmuteCommands);
       annyang.start();
 
       setInterval(function() {
