@@ -38,13 +38,18 @@ io.on('connection', (socket) => {
 
   // Video sync events
   socket.on('play', (time) => {
-    console.log('Play command recieved');
+    console.log('Play command received');
     socket.broadcast.emit('play', time);
   });
 
   socket.on('pause', (time) => {
-    console.log('Pause command recieved');
+    console.log('Pause command received');
     socket.broadcast.emit('pause', time);
+  });
+
+  socket.on('go back', (time) => {
+    console.log('Go back command received');
+    socket.broadcast.emit('go back', time);
   });
 });
 
