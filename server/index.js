@@ -51,6 +51,11 @@ io.on('connection', (socket) => {
     console.log('Go back command received');
     socket.broadcast.emit('go back', time);
   });
+
+  socket.on('progress', (progress) => {
+    // Emits the progress of youtube video from client ReactPlayer components
+    socket.broadcast.emit('progress', progress);
+  });
 });
 
 
