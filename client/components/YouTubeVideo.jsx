@@ -19,7 +19,6 @@ class YouTubeVideo extends React.Component {
 
   componentDidMount() {
     this.props.socket.on('progress', (otherProgress) => {
-      console.log('this played:', this.state.played, 'otherplayed:', otherProgress.played);
       // Sync videos if they are way off:
       this.syncVideos(this.state.played, otherProgress.played);
     });
@@ -28,8 +27,6 @@ class YouTubeVideo extends React.Component {
   emitPlayAndListenForPause() {
     this.props.socket.emit('play', { played: this.state.played, loaded: this.state.loaded });
     this.props.socket.on('pause', (otherFraction) => {
-      // console.log('thisplayed:', this.state.played, 'otherplayed:', otherFraction.played);
-      // this.syncVideos(this.state.played, otherFraction.played);
       this.setState({ 
         playing: false,
       });
@@ -39,8 +36,6 @@ class YouTubeVideo extends React.Component {
   emitPauseAndListenForPlay() {
     this.props.socket.emit('pause', { played: this.state.played, loaded: this.state.loaded });
     this.props.socket.on('play', (otherFraction) => {
-      // console.log('thisplayed:', this.state.played, 'otherplayed:', otherFraction.played);
-      // this.syncVideos(this.state.played, otherFraction.played);
       this.setState({ 
         playing: true,
       });
