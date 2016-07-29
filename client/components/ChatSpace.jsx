@@ -87,7 +87,7 @@ class ChatSpace extends React.Component {
             {this.state.messages.map((message, i) => <Message message={message} key={i} />)}
           </ul>
         </div>
-        <form onSubmit={this.handleSubmit}>
+        <form className="chat-form" onSubmit={this.handleSubmit}>
           <input
             type="text"
             id="m"
