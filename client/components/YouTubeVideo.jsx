@@ -17,11 +17,19 @@ class YouTubeVideo extends React.Component {
     this.onProgress = this.onProgress.bind(this);
   }
 
+  componentDidMount() {
+    this.props.socket.on('progress', (otherProgress) => {
+      console.log('this played:', this.state.played, 'otherplayed:', otherProgress.played);
+      // Sync videos if they are way off:
+      this.syncVideos(this.state.played, otherProgress.played);
+    });
+  }
+
   emitPlayAndListenForPause() {
-    this.props.socket.emit('play', this.state.played);
-    this.props.socket.on('pause', (otherPlayedFraction) => {
-      console.log('thisplayed:', this.state.played, 'otherplayed:', otherPlayedFraction);
-      this.syncVideos(this.state.played, otherPlayedFraction);
+    this.props.socket.emit('play', { played: this.state.played, loaded: this.state.loaded });
+    this.props.socket.on('pause', (otherFraction) => {
+      // console.log('thisplayed:', this.state.played, 'otherplayed:', otherFraction.played);
+      // this.syncVideos(this.state.played, otherFraction.played);
       this.setState({ 
         playing: false,
       });
@@ -29,28 +37,29 @@ class YouTubeVideo extends React.Component {
   }
 
   emitPauseAndListenForPlay() {
-    this.props.socket.emit('pause', this.state.played);
-    this.props.socket.on('play', (otherPlayedFraction) => {
-      console.log('thisplayed:', this.state.played, 'otherplayed:', otherPlayedFraction);
-      this.syncVideos(this.state.played, otherPlayedFraction);
+    this.props.socket.emit('pause', { played: this.state.played, loaded: this.state.loaded });
+    this.props.socket.on('play', (otherFraction) => {
+      // console.log('thisplayed:', this.state.played, 'otherplayed:', otherFraction.played);
+      // this.syncVideos(this.state.played, otherFraction.played);
       this.setState({ 
         playing: true,
       });
     });
   }
 
-  syncVideos(currentFraction, otherFraction) {
-    var currentTime = Math.floor(currentFraction * this.state.duration);
-    var otherTime = Math.floor(otherFraction * this.state.duration);
+  syncVideos(currentPlayedFraction, otherPlayedFraction) {
+    var currentTime = Math.floor(currentPlayedFraction * this.state.duration);
+    var otherTime = Math.floor(otherPlayedFraction * this.state.duration);
 
     if (currentTime > otherTime + 0.5 || currentTime < otherTime - 0.5) {
-      this.refs.player.seekTo(otherFraction);
+      this.refs.player.seekTo(otherPlayedFraction);
     }
   }
 
   onProgress(state) {
-    //TODO save progress
     this.setState(state);
+    // emit the progress of the video so server can listen and keep the two peers in sync
+    this.props.socket.emit('progress', state);
   }
 
   render () {
@@ -64,7 +73,7 @@ class YouTubeVideo extends React.Component {
         onPause={ this.emitPauseAndListenForPlay }
         onProgress = { this.onProgress }
         progressFrequency = { 250 }
-        onDuration = { duration => this.setState({ duration })}
+        onDuration = { duration => this.setState({ duration }) }
       />
     )
   }
