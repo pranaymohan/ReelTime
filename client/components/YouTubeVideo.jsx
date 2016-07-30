@@ -6,39 +6,33 @@ class YouTubeVideo extends React.Component {
     super(props);
 
     this.state = {
-      playing: false,
       played: 0,
       loaded: 0,
-      duration: 0,
+      duration: 0
     }
 
-    this.emitPlayAndListenForPause = this.emitPlayAndListenForPause.bind(this);
-    this.emitPauseAndListenForPlay = this.emitPauseAndListenForPlay.bind(this);
+    this.emitPlayAndListenForPause = this.props.emitPlayAndListenForPause.bind(this);
+    this.emitPauseAndListenForPlay = this.props.emitPauseAndListenForPlay.bind(this);
     this.onProgress = this.onProgress.bind(this);
   }
 
   componentDidMount() {
+    this.props.initVoice();
+    this.initListeners();
+  }
+
+  initListeners() {
+    this.props.socket.on('go back', () => {
+      console.log('go back message received, about to sync');
+      var currentTime = Math.floor(this.state.played * this.state.duration);
+      var targetTime = Math.floor(currentTime - 10, 0);
+      var targetFraction = targetTime / this.state.duration;
+      this.syncVideos(this.state.played, targetFraction);
+    });
+
     this.props.socket.on('progress', (otherProgress) => {
       // Sync videos if they are way off:
       this.syncVideos(this.state.played, otherProgress.played);
-    });
-  }
-
-  emitPlayAndListenForPause() {
-    this.props.socket.emit('play', { played: this.state.played, loaded: this.state.loaded });
-    this.props.socket.on('pause', (otherFraction) => {
-      this.setState({ 
-        playing: false,
-      });
-    });
-  }
-
-  emitPauseAndListenForPlay() {
-    this.props.socket.emit('pause', { played: this.state.played, loaded: this.state.loaded });
-    this.props.socket.on('play', (otherFraction) => {
-      this.setState({ 
-        playing: true,
-      });
     });
   }
 
@@ -63,7 +57,8 @@ class YouTubeVideo extends React.Component {
         ref='player'
         url={ this.props.url }
         controls
-        playing={ this.state.playing }
+        playing={ this.props.playing }
+        volume={ this.props.volume }
         onPlay={ this.emitPlayAndListenForPause }
         onPause={ this.emitPauseAndListenForPlay }
         onProgress = { this.onProgress }

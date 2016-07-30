@@ -13,8 +13,14 @@ class VideoWrapper extends Component {
     super(props);
 
     this.state = {
-      youtubeLink: props.youtubeLink
+      youtubeLink: props.youtubeLink,
+      playing: false,
+      volume: 0.8
     };
+
+    this.initVoice = this.initVoice.bind(this);
+    this.emitPlayAndListenForPause = this.emitPlayAndListenForPause.bind(this);
+    this.emitPauseAndListenForPlay = this.emitPauseAndListenForPlay.bind(this);
   }
 
   componentDidMount() {
@@ -23,6 +29,7 @@ class VideoWrapper extends Component {
     } else {
       this.initAsReceiver(this.props.videoType, this.props.peerId);
     }
+    this.initListeners();
   }
 
   initAsSource(videoType) {
@@ -67,16 +74,161 @@ class VideoWrapper extends Component {
     });
   }
 
+  initListeners() {
+    this.props.socket.on('play', () => {
+      this.setState({ 
+        playing: true
+      });
+    });
+
+    this.props.socket.on('pause', () => {
+      this.setState({ 
+        playing: false
+      });
+    });
+  }
+
+  // Initialize annyong voice command library and define commands
+  initVoice(video) {
+    video = video || null;
+
+    var playFunction = () => {
+      console.log('play voice command received');
+      // TODO: dry this out using setstate for Video component too  
+      (video) ? video.play() : this.setState({ playing: true }); 
+      this.emitPlayAndListenForPause(video);
+    };
+
+    var pauseFunction = () => {
+      console.log('pause voice command received');
+      // TODO: dry this out using setstate for Video component too
+      (video) ? video.pause() : this.setState({ playing: false });
+      this.emitPauseAndListenForPlay(video);
+    };
+
+    var goBackFunction = () => {
+      console.log('go back voice command received');
+      if (video) {
+        video.currentTime = Math.floor(video.currentTime - 10, 0);  
+      }
+      this.emitGoBack(video);
+    };
+
+    var muteFunction = () => {
+      console.log('mute voice command received');
+      if (video) {
+        video.muted = true;  
+      } else {
+        this.setState({ volume: 0 });  
+      }
+    };
+
+    var unmuteFunction = () => {
+      console.log('unmute voice command received');
+      if (video) {
+        video.muted = false;  
+      } else {
+        this.setState({ volume: 1 });  
+      }
+    };
+
+    var playCommands = {'play': playFunction};
+    var goBackCommands = {'go back': goBackFunction};
+
+    // define words that empirically sound like our main command, and synonyms
+    var pauseWords = ['pause', 'call', 'car', 'cars', 'cause', 'hans', 
+      'hollis', 'hot', 'palm', 'paul', 'paula\'s', 'paw', 'pawn', 
+      'paws', 'pod', 'pods', 'polish', 'pond', 'posh'];
+    var muteWords = ['mute', 'new', 'news', 'newt', 'nude', 'use', 'used', 'you'];
+    var unmuteWords = ['unmute', 'enhance', 'enhanced', 'in hands', 'in hats', 'n hance'];
+
+    // generate a command object for each array of command words
+    var pauseCommands = pauseWords.reduce(function(obj, word) {
+      obj[word] = pauseFunction;
+      return obj;
+    }, {});
+
+    var muteCommands = muteWords.reduce(function(obj, word) {
+      obj[word] = muteFunction;
+      return obj;
+    }, {});
+
+    var unmuteCommands = unmuteWords.reduce(function(obj, word) {
+      obj[word] = unmuteFunction;
+      return obj;
+    }, {});
+
+
+    if (annyang) {
+      annyang.debug();
+      annyang.addCommands(playCommands);
+      annyang.addCommands(pauseCommands);
+      annyang.addCommands(goBackCommands);
+      annyang.addCommands(muteCommands);
+      annyang.addCommands(unmuteCommands);
+      annyang.start();
+
+      setInterval(function() {
+        var listen = annyang.isListening();
+        console.log('listen:', listen);
+      }, 1000);
+
+      annyang.addCallback('error', function(err) {
+        console.log('annyang error:', err);
+      });
+    }
+  }
+
+  emitPlayAndListenForPause(eventOrVideo) {
+    if (eventOrVideo) {
+      const video = eventOrVideo.target ? eventOrVideo.target : eventOrVideo;
+      this.props.socket.emit('play', video.currentTime);
+    } else {
+      this.props.socket.emit('play');
+    }
+  }
+
+  emitPauseAndListenForPlay(eventOrVideo) {
+    if (eventOrVideo) {
+      const video = eventOrVideo.target ? eventOrVideo.target : eventOrVideo;
+      this.props.socket.emit('pause', video.currentTime);  
+    } else {
+      this.props.socket.emit('pause');  
+    }
+  }
+
+  emitGoBack(video) {
+    // this method will only ever be passed a video, never an event
+    if (video) {
+      this.props.socket.emit('go back', video.currentTime);  
+    } else {
+      this.props.socket.emit('go back');
+    }
+  }
+
   render() {
     return (
       <div>
         {this.props.videoType === 'file' ?
           <div className="wrapper">
-            <Video socket={this.props.socket} />
+            <Video 
+              socket={this.props.socket} 
+              initVoice={this.initVoice} 
+              emitPlayAndListenForPause={this.emitPlayAndListenForPause} 
+              emitPauseAndListenForPlay={this.emitPauseAndListenForPlay} 
+            />
             <ChatSpace socket={this.props.socket} isSource={this.props.isSource} peerId={this.props.peerId} />
           </div> :
           <div className="wrapper">
-            <YouTubeVideo socket={this.props.socket} url={ this.state.youtubeLink }/>
+            <YouTubeVideo 
+              socket={this.props.socket} 
+              initVoice={this.initVoice} 
+              emitPlayAndListenForPause={this.emitPlayAndListenForPause} 
+              emitPauseAndListenForPlay={this.emitPauseAndListenForPlay}
+              playing={this.state.playing}
+              volume={this.state.volume}
+              url={ this.state.youtubeLink }
+            />
             <ChatSpace socket={this.props.socket} isSource={this.props.isSource} peerId={this.props.peerId} />
           </div>
         }
