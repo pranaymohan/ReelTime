@@ -6,11 +6,9 @@ class YouTubeVideo extends React.Component {
     super(props);
 
     this.state = {
-      playing: this.props.playing || false,
       played: 0,
       loaded: 0,
-      duration: 0,
-      volume: this.props.volume || 0.8
+      duration: 0
     }
 
     this.emitPlayAndListenForPause = this.props.emitPlayAndListenForPause.bind(this);
@@ -19,43 +17,24 @@ class YouTubeVideo extends React.Component {
   }
 
   componentDidMount() {
-    this.props.initVoice(video); // HOW DO I GET THE VIDEO
+    this.props.initVoice();
     this.initListeners();
   }
 
   initListeners() {
-    this.props.socket.on('play', (otherFraction) => {
-      this.setState({ 
-        playing: true
-      });
+    this.props.socket.on('go back', () => {
+      console.log('go back message received, about to sync');
+      var currentTime = Math.floor(this.state.played * this.state.duration);
+      var targetTime = Math.floor(currentTime - 10, 0);
+      var targetFraction = targetTime / this.state.duration;
+      this.syncVideos(this.state.played, targetFraction);
     });
-
-    this.props.socket.on('pause', (otherFraction) => {
-      this.setState({ 
-        playing: false
-      });
-    });
-
-    // MAY NOT NEED THIS FOR YT DUE TO ON PROGRESS LISTENER
-    // this.props.socket.on('go back', (otherTime) => {
-    //   console.log('go back message received, about to sync');
-    //   this.syncVideos(video, otherTime);
-    // });
 
     this.props.socket.on('progress', (otherProgress) => {
       // Sync videos if they are way off:
       this.syncVideos(this.state.played, otherProgress.played);
     });
   }
-
-  // COMMENTING THIS OUT BECAUSE I CANT SEE WHY ITS NEEDED. DELEGATING TO THE VERSION PASSED IN
-  // emitPlayAndListenForPause() {
-  //   this.props.socket.emit('play', { played: this.state.played, loaded: this.state.loaded });
-  // }
-
-  // emitPauseAndListenForPlay() {
-  //   this.props.socket.emit('pause', { played: this.state.played, loaded: this.state.loaded });
-  // }
 
   syncVideos(currentPlayedFraction, otherPlayedFraction) {
     var currentTime = Math.floor(currentPlayedFraction * this.state.duration);
@@ -78,8 +57,8 @@ class YouTubeVideo extends React.Component {
         ref='player'
         url={ this.props.url }
         controls
-        playing={ this.state.playing }
-        volume={ this.state.volume }
+        playing={ this.props.playing }
+        volume={ this.props.volume }
         onPlay={ this.emitPlayAndListenForPause }
         onPause={ this.emitPauseAndListenForPlay }
         onProgress = { this.onProgress }

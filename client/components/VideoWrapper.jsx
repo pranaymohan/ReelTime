@@ -29,6 +29,7 @@ class VideoWrapper extends Component {
     } else {
       this.initAsReceiver(this.props.videoType, this.props.peerId);
     }
+    this.initListeners();
   }
 
   initAsSource(videoType) {
@@ -73,38 +74,62 @@ class VideoWrapper extends Component {
     });
   }
 
+  initListeners() {
+    this.props.socket.on('play', () => {
+      this.setState({ 
+        playing: true
+      });
+    });
+
+    this.props.socket.on('pause', () => {
+      this.setState({ 
+        playing: false
+      });
+    });
+  }
+
   // Initialize annyong voice command library and define commands
   initVoice(video) {
+    video = video || null;
+
     var playFunction = () => {
       console.log('play voice command received');
-      video.play(); // NEED TO DRY THIS OUT SO THAT YT VIDEO WILL PLAY TOO - use setstate
-      this.setState({ playing: true });
+      // TODO: dry this out using setstate for Video component too  
+      (video) ? video.play() : this.setState({ playing: true }); 
       this.emitPlayAndListenForPause(video);
     };
 
     var pauseFunction = () => {
       console.log('pause voice command received');
-      video.pause(); // NEED TO DRY THIS OUT SO THAT YT VIDEO WILL PLAY TOO - use setstate
-      this.setState({ playing: false });
+      // TODO: dry this out using setstate for Video component too
+      (video) ? video.pause() : this.setState({ playing: false });
       this.emitPauseAndListenForPlay(video);
     };
 
     var goBackFunction = () => {
       console.log('go back voice command received');
-      video.currentTime = Math.floor(video.currentTime - 10, 0);
+      if (video) {
+        video.currentTime = Math.floor(video.currentTime - 10, 0);  
+      }
       this.emitGoBack(video);
     };
 
     var muteFunction = () => {
       console.log('mute voice command received');
-      video.muted = true;
-      this.setState({ volume: 0 });
+      if (video) {
+        video.muted = true;  
+      } else {
+        this.setState({ volume: 0 });  
+      }
     };
 
     var unmuteFunction = () => {
       console.log('unmute voice command received');
-      video.muted = false;
-      this.setState({ volume: 1 });
+      if (video) {
+        video.muted = false;  
+      } else {
+        this.setState({ volume: 1 });  
+      }
     };
 
     var playCommands = {'play': playFunction};
@@ -155,18 +180,30 @@ class VideoWrapper extends Component {
   }
 
   emitPlayAndListenForPause(eventOrVideo) {
-    const video = eventOrVideo.target ? eventOrVideo.target : eventOrVideo;
-    this.props.socket.emit('play', video.currentTime);
+    if (eventOrVideo) {
+      const video = eventOrVideo.target ? eventOrVideo.target : eventOrVideo;
+      this.props.socket.emit('play', video.currentTime);
+    } else {
+      this.props.socket.emit('play');
+    }
   }
 
   emitPauseAndListenForPlay(eventOrVideo) {
-    const video = eventOrVideo.target ? eventOrVideo.target : eventOrVideo;
-    this.props.socket.emit('pause', video.currentTime);
+    if (eventOrVideo) {
+      const video = eventOrVideo.target ? eventOrVideo.target : eventOrVideo;
+      this.props.socket.emit('pause', video.currentTime);  
+    } else {
+      this.props.socket.emit('pause');  
+    }
   }
 
   emitGoBack(video) {
     // this method will only ever be passed a video, never an event
-    this.props.socket.emit('go back', video.currentTime);
+    if (video) {
+      this.props.socket.emit('go back', video.currentTime);  
+    } else {
+      this.props.socket.emit('go back');
+    }
   }
 
   render() {
