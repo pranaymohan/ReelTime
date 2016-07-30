@@ -40,7 +40,8 @@ class YouTubeVideo extends React.Component {
     var currentTime = Math.floor(currentPlayedFraction * this.state.duration);
     var otherTime = Math.floor(otherPlayedFraction * this.state.duration);
 
-    if (currentTime > otherTime + 0.5 || currentTime < otherTime - 0.5) {
+    if (currentTime > otherTime + 1 || currentTime < otherTime - 1) {
+      console.log('syncing videos!');
       this.refs.player.seekTo(otherPlayedFraction);
     }
   }
@@ -62,7 +63,7 @@ class YouTubeVideo extends React.Component {
         onPlay={ this.emitPlayAndListenForPause }
         onPause={ this.emitPauseAndListenForPlay }
         onProgress = { this.onProgress }
-        progressFrequency = { 250 }
+        progressFrequency = { 500 }
         onDuration = { duration => this.setState({ duration }) }
       />
     )
