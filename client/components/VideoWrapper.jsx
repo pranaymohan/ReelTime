@@ -13,7 +13,9 @@ class VideoWrapper extends Component {
     super(props);
 
     this.state = {
-      youtubeLink: props.youtubeLink
+      youtubeLink: props.youtubeLink,
+      playing: false,
+      volume: 0.8
     };
 
     this.initVoice = this.initVoice.bind(this);
@@ -75,13 +77,15 @@ class VideoWrapper extends Component {
   initVoice(video) {
     var playFunction = () => {
       console.log('play voice command received');
-      video.play();
+      video.play(); // NEED TO DRY THIS OUT SO THAT YT VIDEO WILL PLAY TOO - use setstate
+      this.setState({ playing: true });
       this.emitPlayAndListenForPause(video);
     };
 
     var pauseFunction = () => {
       console.log('pause voice command received');
-      video.pause();
+      video.pause(); // NEED TO DRY THIS OUT SO THAT YT VIDEO WILL PLAY TOO - use setstate
+      this.setState({ playing: false });
       this.emitPauseAndListenForPlay(video);
     };
 
@@ -94,11 +98,13 @@ class VideoWrapper extends Component {
     var muteFunction = () => {
       console.log('mute voice command received');
       video.muted = true;
+      this.setState({ volume: 0 });
     };
 
     var unmuteFunction = () => {
       console.log('unmute voice command received');
       video.muted = false;
+      this.setState({ volume: 1 });
     };
 
     var playCommands = {'play': playFunction};
@@ -177,7 +183,15 @@ class VideoWrapper extends Component {
             <ChatSpace socket={this.props.socket} isSource={this.props.isSource} peerId={this.props.peerId} />
           </div> :
           <div className="wrapper">
-            <YouTubeVideo socket={this.props.socket} url={ this.state.youtubeLink }/>
+            <YouTubeVideo 
+              socket={this.props.socket} 
+              initVoice={this.initVoice} 
+              emitPlayAndListenForPause={this.emitPlayAndListenForPause} 
+              emitPauseAndListenForPlay={this.emitPauseAndListenForPlay}
+              playing={this.state.playing}
+              volume={this.state.volume}
+              url={ this.state.youtubeLink }
+            />
             <ChatSpace socket={this.props.socket} isSource={this.props.isSource} peerId={this.props.peerId} />
           </div>
         }
